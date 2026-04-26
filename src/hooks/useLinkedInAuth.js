@@ -1,23 +1,15 @@
 /**
  * useLinkedInAuth.js — LinkedInCity
- * React hook to check if the user is authenticated with LinkedIn.
- * Calls GET /api/linkedin/me on mount and exposes auth state to the app.
+ * Manages LinkedIn OAuth session state.
  *
- * Returns:
- *   isAuthenticated {boolean}
- *   profile         {object|null}  LinkedIn profile from OpenID Connect
- *   authLoading     {boolean}
- *   checkAuth       {()=>void}     Re-check session (e.g. after redirect back)
- *   logout          {()=>Promise}  POST /api/linkedin/logout then reset state
+ * Token flow (cross-origin production):
+ *   1. After OAuth callback, backend redirects to /?auth=1&token=xxx
+ *   2. This hook reads ?token from the URL on mount and stores in sessionStorage
+ *   3. All subsequent API calls use Authorization: Bearer <token>
  */
 
 import { useState, useEffect, useCallback } from 'react';
-
-// In Vercel production the frontend and API are on the same origin, so no base needed.
-// VITE_API_URL can override for custom setups.
-const API_BASE = typeof import.meta !== 'undefined'
-  ? (import.meta.env?.VITE_API_URL || '')
-  : '';
+import { apiFetch, setToken, clearToken } from '../utils/apiClient';
 
 export function useLinkedInAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -27,9 +19,8 @@ export function useLinkedInAuth() {
   const checkAuth = useCallback(async () => {
     setAuthLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/linkedin/me`, {
-        credentials: 'include',
-        signal: AbortSignal.timeout(6000),
+      const res = await apiFetch('/api/linkedin/me', {
+        signal: AbortSignal.timeout(8000),
       });
       if (!res.ok) throw new Error('API unreachable');
       const data = await res.json();
@@ -41,7 +32,6 @@ export function useLinkedInAuth() {
         setProfile(null);
       }
     } catch {
-      // Backend not running or network error → silently stay in demo mode
       setIsAuthenticated(false);
       setProfile(null);
     } finally {
@@ -49,19 +39,28 @@ export function useLinkedInAuth() {
     }
   }, []);
 
-  // Check auth on mount
+  // On mount — capture token from URL if redirected back from OAuth
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    if (token) {
+      setToken(token);
+      // Clean token from URL without reload
+      const clean = new URL(window.location.href);
+      clean.searchParams.delete('token');
+      window.history.replaceState({}, '', clean.toString());
+    }
     checkAuth();
   }, [checkAuth]);
 
   const logout = useCallback(async () => {
     try {
-      await fetch(`${API_BASE}/api/linkedin/logout`, {
+      await apiFetch('/api/linkedin/logout', {
         method: 'POST',
-        credentials: 'include',
         signal: AbortSignal.timeout(5000),
       });
-    } catch { /* noop — clear state regardless */ }
+    } catch { /* clear state regardless */ }
+    clearToken();
     setIsAuthenticated(false);
     setProfile(null);
   }, []);

@@ -2,12 +2,12 @@
  * useLinkedInData.js — LinkedInCity
  * Generates deterministic LinkedIn activity data based on username (demo mode).
  * Also provides fetchRealData() for authenticated LinkedIn sessions (real mode).
- * Existing fetchData(username) signature is unchanged — fully backward compatible.
  */
 
 import { useState, useCallback } from "react";
 import { normaliseContributions } from "../utils/dataUtils";
 import { pickType } from "../constants/activityTypes";
+import { apiFetch } from "../utils/apiClient";
 
 // ─── Demo mode: deterministic seeded generator ───────────────────────────────
 
@@ -96,13 +96,12 @@ export function useLinkedInData() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  /** Demo mode — existing behavior, unchanged. Seeded by username string. */
+  /** Demo mode — seeded by username string. */
   const fetchData = useCallback(async (username) => {
     if (!username) return;
     setLoading(true);
     setError(null);
     try {
-      // Simulate network delay for realism
       await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 600));
       const rawDays = generateLinkedInActivity(username);
       const { cells, stats } = normaliseContributions(rawDays);
@@ -117,14 +116,13 @@ export function useLinkedInData() {
 
   /**
    * Real mode — fetches city data from the authenticated LinkedIn session.
-   * Falls back to an error state (caller can retry fetchData for demo mode).
+   * Uses apiFetch → sends Authorization: Bearer token for cross-origin (Vercel + HF).
    */
   const fetchRealData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/linkedin/city", {
-        credentials: "include",
+      const res = await apiFetch("/api/linkedin/city", {
         signal: AbortSignal.timeout(10000),
       });
 
@@ -134,16 +132,14 @@ export function useLinkedInData() {
       }
 
       const cityData = await res.json();
-
-      // cityData.days is { date, count }[] — same format as demo generator
       const { cells, stats } = normaliseContributions(cityData.days);
 
       setData({
         cells,
         stats,
-        profile: cityData.profile,   // real LinkedIn profile fields
+        profile: cityData.profile,
         username: cityData.username,
-        source: "linkedin",          // flag used for LIVE badge
+        source: "linkedin",
       });
     } catch (err) {
       setError(err.message || "Failed to load LinkedIn data");
