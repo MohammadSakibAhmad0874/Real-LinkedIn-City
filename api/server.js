@@ -168,9 +168,24 @@ app.post('/api/linkedin/logout', (req, res) => {
   return res.json({ ok: true });
 });
 
+// ── Root route (HF Spaces App tab) ───────────────────────────────────────────
+app.get('/', (_req, res) => res.json({
+  service: 'LinkedInCity API',
+  status: 'running',
+  version: '1.0.0',
+  endpoints: {
+    health: '/api/health',
+    login: '/api/linkedin/login',
+    me: '/api/linkedin/me',
+    city: '/api/linkedin/city',
+    logout: 'POST /api/linkedin/logout',
+  },
+}));
+
 // ── Health check ───────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) =>
   res.json({ status: 'ok', service: 'linkedincity-api', env: process.env.NODE_ENV })
 );
+
 
 export default app;
