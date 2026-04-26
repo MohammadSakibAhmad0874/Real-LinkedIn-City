@@ -4,6 +4,10 @@
   <img src="https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite 5" />
   <img src="https://img.shields.io/badge/LinkedIn-OAuth-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn OAuth" />
   <img src="https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" />
+  <a href="https://real-linked-in-city.vercel.app/">
+    <img src="https://img.shields.io/badge/🌐_Live_Demo-Visit_Now-22c55e?style=for-the-badge" alt="Live Demo" />
+  </a>
+  <img src="https://img.shields.io/badge/Deployed_on-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Deployed on Vercel" />
 </p>
 
 <h1 align="center">🏙️ LinkedInCity</h1>
@@ -14,6 +18,16 @@
 
 <p align="center">
   <em>Connect with your real LinkedIn account to generate a personalized city — filter by activity type, drive through streets, and explore your professional journey as a living cityscape.</em>
+</p>
+
+<p align="center">
+  <a href="https://real-linked-in-city.vercel.app/">
+    <img src="https://img.shields.io/badge/🚀_Open_Live_App-real--linked--in--city.vercel.app-0077B5?style=for-the-badge&logo=vercel&logoColor=white" alt="Open Live App" />
+  </a>
+</p>
+
+<p align="center">
+  <strong>🌐 <a href="https://real-linked-in-city.vercel.app/">https://real-linked-in-city.vercel.app</a></strong>
 </p>
 
 
